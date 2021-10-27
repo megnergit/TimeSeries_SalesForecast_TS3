@@ -12,6 +12,8 @@ from plotly.subplots import make_subplots
 # import folium
 # from folium import Choropleth, Circle, Marker
 # from folium.plugins import HeatMap, MarkerCluster, HeatMap
+from IPython.display import IFrame
+
 from scipy.signal import periodogram
 from sklearn.metrics import mean_squared_error
 import statsmodels.api as sm
@@ -81,15 +83,21 @@ def show_whole_dataframe(show):
 
 
 def fig_wrap(fig, file_name):
+    w = '1280px'
+    h = '640px'
     from IPython import get_ipython
+    fig.write_image(file_name, width=w, height=h)
+
     is_jupyter = get_ipython().__class__.__name__
     if is_jupyter == 'NoneType':
-        fig.write_image(file_name)
         return fig.show()
 
     else:
-        return fig
-
+        from IPython.display import IFrame
+        html_file = Path(str(file_name).replace('png', 'html'))
+        fig.write_html(html_file)
+        return IFrame(html_file, width='100%', height='640px')
+#        return IFrame(file_name, width=w, height=h)
 # -------------------------------------------------------
 
 
@@ -127,7 +135,6 @@ def split_week(ts, append=True):
     ts['Week_Begin'] = a
     ts['Week_End'] = b
 
-#    ts.set_index(['Week_Begin', 'Week_End'], append=append, inplace=True)
     ts.set_index(['Week_Begin'], append=append, inplace=True)
 
     return ts
@@ -286,10 +293,17 @@ def show_training_results(X, y, X_train, y_fit, X_test, y_pred,
 
     try:
         X.index = X.index.to_timestamp()
-        X_train.index = X_train.index.to_timestamp()
-        X_test.index = X_test.index.to_timestamp()
+    except (AttributeError, TypeError):
+        pass
 
-    except AttributeError:
+    try:
+        X_train.index = X_train.index.to_timestamp()
+    except (AttributeError, TypeError):
+        pass
+
+    try:
+        X_test.index = X_test.index.to_timestamp()
+    except (AttributeError, TypeError):
         pass
 
     try:  # in case of multiple output
@@ -347,7 +361,7 @@ def evaluate_error(y_train, y_fit, y_test, y_pred):
     print(f'\033[33mTrain RMSE: \033[96m{train_rmse:6.2f}\033[0m')
 
     test_rmse = mean_squared_error(y_test, y_pred, squared=False)
-    print(f'\033[33mTest RMSE : \033[96m{test_rmse:6.2f}\033[0m')
+    print(f'\033[91mTest RMSE : \033[96m{test_rmse:6.2f}\033[0m')
 
     return train_rmse, test_rmse
 

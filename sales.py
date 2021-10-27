@@ -10,60 +10,50 @@
 # | offered by Ryan Holbrook.
 
 # | We have [the sales record of thousand types of products
-# | in the supermarket-chain 'Favorita' in Ecuador](https://www.kaggle.com/c/store-sales-time-series-forecasting).
+# | in the supermarket chain 'Favorita' in Ecuador](https://www.kaggle.com/c/store-sales-time-series-forecasting).
 # | We will make predictions of the sales in the future, using
-# | the data and machine learning techniques. We also have
-# | anchillery data, such as the official holidays in Ecuador,
+# | the data and the machine learning techniques. We also have
+# | ancillary data, such as the official holidays in Ecuador,
 # | and the prices of oil in the country in the month.
-# | The main focus in this notebook is __cycles__ in time series.
-# | 'Lags' is the usual technique to deal with cycles, but we will
+# | The main focus in this notebook is __cycles__ in the time series.
+# | 'Lags' is the usual technique to deal with the cycles, but we will
 # | also try __moving average__ to reproduce the cycles, to see
 # | how the two technique work similarly or differently.
 
 # | There are two types of machine learning models.
-# |  1. can learn trend  [linear regression].
-# |  2. cannot learn trend [xgboost, decision trees, etc.].
-# | because the latter do not learn to 'extrapolate'.
-# |
-# | In order to make the most of machine learning technique,
-# | we will combine both. Use a linear model to extrapolate in the first stage,
-# | and use more soffisticated models to reproeuce the residuals in the second
-# | stage. This multi-stage stragey is called __hybrid models__.
-# | In this notebook we will combine a linear regressor with `xgboost`.
+# |  1. that can learn a trend  [linear regression, etc.] and
+# |  2. that cannot learn a trend [xgboost, decision trees, etc.],
+# | because the latter does not learn to 'extrapolate'.
 # |
 
+# | In order to make the most of the machine learning,
+# | we will combine both. Use a linear model to extrapolate the target
+# | in the first stage, and use more sophisticated models to
+# | reproduce the residuals in the second stage.
+# | This multi-stage strategy is called __hybrid models__.
+# | In this notebook we will start with combining a linear regressor
+# | with `xgboost`, and continue to mix other models as well.
+
 # | ## 2. Task
-# | 1. Concentrate on the sales of magazines.
-# |    + deseason.
+# |
+# | 1. Concentrate on the sales of magazines. Keep in mind
+# | the following components,
+# |
+# |    + seasonality.
 # |    + lags.
-# |    + partial Autocorrelation function.
-# |    + anchillery data for the products on promotion.
+# |    + partial autocorrelation function.
+# |    + ancillary data for the products on promotion.
+
 # |
 # | Note that lags contains seasonality, as 7-days (weekly) trend
-# | shows up exactly as a high correlation of data separated by 7-days
-# | (=7 days lag). In order to isolate the lagged features (that are not seanality),
+# | shows up exactly as a high correlation of the feature separated by 7-days
+# | (=7 days lag). In order to isolate the lagged features (that are not seasonality),
 # |  we will have to first remove the seasonality from the target feature.
 # |
+
 # | ## 3. Data
 # | 1. [sales record in supermarket-chain 'Favorita' in Ecuador](https://www.kaggle.com/c/store-sales-time-series-forecasting).
 # |
-
-
-# -------------------------------------------------------
-# |- cycles: lags
-# |+ lags includes saesonality
-# |+ remove them first
-# |
-# |- pacf
-# |
-# |- magazine with on promotion
-# |- running average
-# |
-# |the number of items on a special promotion that day
-# |
-# |- rolling statistics
-# |center = False
-# -------------------------------------------------------
 
 # | ## 4. Notebook
 # -------------------------------------------------------
@@ -91,6 +81,8 @@ from xgboost import XGBRegressor
 from IPython.display import display
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
+from IPython.display import IFrame
+
 import kaleido
 from kaggle_tsa.ktsa import *
 
@@ -124,10 +116,10 @@ set_data_dir(KAGGLE_DIR, CWD)
 show_whole_dataframe(True)
 
 # -------------------------------------------------------
-# | Goal is to make 3 DafaFrames.
+# | Goal is to make 3 `DafaFrames`.
 # |
 # | 1. `sales` : whole table with minimum manipulation.
-# | 2. `family`: sales aggregatedd for each product-family.
+# | 2. `family`: sales aggregated for each product-family.
 # | 3. `mag`   : `MAGAZINE` column of the data 2.
 
 # -------------------------------------------------------
@@ -142,8 +134,8 @@ s_cols.remove('id')
 # | Read `sales` once again with manipulation.
 # | Note
 # | * The order of `MultiIndex` must be exactly like this.
-# | * Need `.sort_index()`
-# | Anomally on the new years day in 2017 is removed.
+# | * We need `.sort_index()`
+# | Anomaly on the new years day in 2017 is removed.
 
 sales = pd.read_csv(DATA_DIR/'train.csv',
                     usecols=s_cols,
@@ -162,18 +154,19 @@ sales = sales.sort_index()
 # | Create `family` from `sales`.
 # | Get used to
 # | * `.unstack()` to pivot a `DataFrame`
-# | * `.loc['2017']` to select rows without specifying
-# |    minimun and maximum.
-# |
-# | The sales of all stores are avearged. Therefore
-# | no column for `store_nbr` in `family`.
+# | * `.loc['2017']` to select the rows without specifying
+# |    minimum and maximum in the date index.
+
+
+# | The sales of all stores are averaged. Therefore
+# | no column is left for `store_nbr` in `family`.
 
 family = sales.groupby(['family', 'date']).mean().unstack(
     'family').loc['2017', ['sales', 'onpromotion']]
 
 # -------------------------------------------------------
 # | Create `mag` from `family`.
-# | Note how to retrieve columns when the column indices have
+# | Note how to retrieve the columns when the column indices have
 # | multiple layers.
 
 print(family.info())
@@ -181,7 +174,7 @@ mag = family.loc[:,
                  [('sales', 'MAGAZINES'), ('onpromotion', 'MAGAZINES')]]
 
 # -------------------------------------------------------
-# | Let us have a look at data.
+# | Let us have a look at the data.
 
 trace = go.Scatter(x=mag.index.to_timestamp(),
                    y=mag['sales']['MAGAZINES'])
@@ -193,20 +186,21 @@ fig = go.Figure(data=data, layout=layout)
 fig_wrap(fig, IMAGE_DIR/'fig1.png')
 
 # -------------------------------------------------------
-# Looks like `mag` has a clean, week-long seasonality.
+# | Looks like `mag` has a clean, one-week long seasonality.
 #
 # -------------------------------------------------------
-# As usual, we will check
-# - periodogram (Fourier decomposition)
-# - correlogram (PACF)
+# | As usual, we will check
+# | - periodogram (Fourier decomposition)
+# | - correlogram (PACF, lags)
 
 # -------------------------------------------------------
-# | First perodogram.
+# | First periodogram.
 # |
 # |__`periodogram`__:\
 # | `detrend` {'linear', 'constant'}\
 # | `window`  {'boxcar', 'gaussian', ...} `scipy.signal.get_window`[shape of window function](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html#scipy.signal.get_window)\
 # | `scaling` {'density', 'spectrum'}\
+
 # | The units are [V<sup>2</sup>/Hz] for 'density' (power spectrum) and [V<sup>2</sup>] for 'spectrum'.
 
 y = mag[('sales', 'MAGAZINES')].copy()
@@ -287,30 +281,30 @@ train_rmse, test_rmse = evaluate_error(
     y_train, y_fit_boosted, y_test, y_pred_boosted)
 
 # -------------------------------------------------------
-# | After manually tunign the `xgboost` parameters,
-# | we could go a good as a model with a linear regression only.
+# | Even after manually tuning the `xgboost` parameters,
+# | we could not improve the results with a linear regression
+# | only.
 
 
 # | So, there is no advantage in adding `XGBoost` in the second
-# | stage. We will try further folowing.
+# | stage. We will try the hybrid models further in the following
+# | steps.
 # |
-# | 1. Create 'BoostedHybrid` class (in `ktsa.py` module)
+# | 1. Create 'BoostedHybrid` class (it is in `ktsa.py` module)
 # |    so that we can try different combinations of a linear model
-# |    and a booster.
-# |
+# |    and a booster quickly.
 # | 2. Create MA (moving average) features and feed them
 # |    to the hybrid models.
 # |
 
 # -------------------------------------------------------
-# | # Model 1 (Linear Model)
+# | __Model 1 examples (Linear Model)__
 # | ```
 # | from sklearn.linear_model import ElasticNet, Lasso, Ridge, LinearRegression
 # | ```
 
-# | # Model 2 (Booster)
+# | __Model 2 examples (Booster)__
 # | ```
-# |
 # | from xgboost import XGBRegressor
 # | from sklearn.ensemble import ExtraTreesRegressor, RandomForestRegressor
 # | from sklearn.neighbors import KNeighborsRegressor
@@ -346,14 +340,12 @@ X2['day'] = X2.index.day
 X2_train, X2_test, y_train, y_test = train_test_split(
     X2, y, test_size=0.2, shuffle=False)
 
-
-# | Need some experiments to see if we should include
+# | Some experiments are necessary to see if we should include
 # | Fourier decomposition and deseasoning in the first stage
 # | or second stage.
-# -------------------------------------------------------
 
 # -------------------------------------------------------
-# | Try all combintations we can think of.
+# | Try all combinations we can think of.
 # | Do not forget to __instantiate__ the models!
 # | [=add '()' after the function name]
 # |
@@ -407,6 +399,7 @@ display(hybrid_result.sort_values('test_rmse'))
 # | Let us have a look.
 # |
 
+
 model = BoostedHybrid(Lasso(), RandomForestRegressor())
 model.fit(X1_train, X2_train, y_train)
 
@@ -419,6 +412,9 @@ fig = show_training_results(X, y,
                             titles=('[Month]', '[Sales]',
                                     'Magazine sales (Optimal Hybrid)'))
 
+
+fig_wrap(fig, IMAGE_DIR/'fig5.png')
+
 fig_wrap(fig, IMAGE_DIR/'fig5.png')
 
 # -------------------------------------------------------
@@ -429,9 +425,9 @@ fig_wrap(fig, IMAGE_DIR/'fig5.png')
 # | Here we will add moving average and other
 # | statistical features. First check how
 # | moving average compares with the target.
+
 # | Quickly repeat modeling with linear regression.
-# |
-# |
+
 
 y = mag[('sales', 'MAGAZINES')].copy()
 
@@ -449,13 +445,13 @@ X = dp.in_sample()
 # y, X = y.align(X, join='inner', axis=0)
 
 # -------------------------------------------------------
-# Split the data
+# | Split the data.
 
 X_train, X_test, y_train, y_test = train_test_split(X, y,
                                                     test_size=0.2, shuffle=False)
 
 # -------------------------------------------------------
-# Train the model.
+# | Train the model.
 
 model = LinearRegression(fit_intercept=False)
 model.fit(X_train, y_train)
@@ -464,7 +460,7 @@ y_fit = model.predict(X_train)
 y_pred = model.predict(X_test)
 
 # -------------------------------------------------------
-# Show the results.
+# | Show the results.
 
 y_fit_ser = pd.Series(y_fit,
                       index=X_train.index,
@@ -492,19 +488,19 @@ fig = go.Figure(data=data, layout=layout)
 fig_wrap(fig, IMAGE_DIR/'fig6.png')
 
 # -------------------------------------------------------
-# | It is indeed the that the moving average reproduce
-# | the residual good. It would be helpful to inclue the
-# | moving average in the features.
-# | We will create new features with moving aggregation
-# | together with the ones we know already, time dummy
+# | It is indeed that the moving average reproduces
+# | the residual good. It would be helpful to include them
+# | in the features.
+# | We will create new features with moving aggregations
+# | together with the ones we know already, i.e., time dummy
 # | and lags.
 # |
 
 # -------------------------------------------------------
-# | Check how many lags are effective
+# | Check how many lags are effective.
 # |
 y = mag[('sales', 'MAGAZINES')].copy()
-n_lag = 12  # safe large value..
+n_lag = 12  # safe large value for the experiment.
 n_cols = 3  # for plotting.
 
 fig, corr = create_lag_plot(y, n_lag, n_cols)
@@ -520,7 +516,7 @@ fig_wrap(fig, IMAGE_DIR/'fig8.png')
 # -------------------------------------------------------
 # | We will  take then `n_lag=10`.
 # -------------------------------------------------------
-# | Let us quickly write function to create
+# | Let us quickly write functions to create
 # | lags and steps.
 
 n_lag = 10
@@ -552,13 +548,12 @@ dp = DeterministicProcess(
 X_time = dp.in_sample()
 
 # -------------------------------------------------------
-# | `onpromotion` fetures
-# | __IMPORTANT:__
-# |
+# | Promotion features.\
+# | __IMPORTANT:__\
 # | The company can decide when to have a promotion
 # | as they like. The decisions are made usually well
 # | beforehand, therefore one can use 'future' `onpromotion`
-# | information in the prediction.
+# | features in the prediction.
 # |
 
 y_promo = mag[('onpromotion', 'MAGAZINES')].copy()
@@ -569,14 +564,14 @@ n_step = 2
 X_promo_step = make_step_features(y_promo, n_step)
 
 # -------------------------------------------------------
-# | Moving average features.
-# |
-# | __IMPORTANT:__
+# | Moving average of target features.\
+# | __IMPORTANT:__\
 # | Do not 'center' the rolling average. Otherwise
-# | we are using future sales information that should not be
-# | available at the time of the forecast (= leakage).
+# | we are using the knowledge of the future sales
+# | that should not be
+# | available at the time of the prediction (= leakage).
 # | Just set  `center = False` (default). As we discussed
-# | before, this does not apply to the promotion information.
+# | above, this does not apply to the promotion information.
 # |
 
 X_mean_7 = y.shift(1).rolling(7, center=False).mean().fillna(0.0)
@@ -585,8 +580,7 @@ X_std_7 = y.shift(1).rolling(7, center=False).std().fillna(0.0)
 X_promo_7 = y.shift(1).rolling(7, center=True).sum().fillna(0.0)
 
 # -------------------------------------------------------
-# | Moving average features.
-# | Now we have following featuers.
+# | Now we have following input features.
 # |
 # | - `X_time`
 # | - `X_lag`
@@ -594,14 +588,14 @@ X_promo_7 = y.shift(1).rolling(7, center=True).sum().fillna(0.0)
 # | - `X_promo_lag`
 # | - `X_promo_step'
 # |
-# | - 'X_mean_7'
-# | - 'X_median_14'
-# | - 'X_std_7'
-# | - 'X_promo_7'
+# | - `X_mean_7`
+# | - `X_median_14`
+# | - `X_std_7`
+# | - `X_promo_7`
 # |
 
-# |  Let us give 'X_time' for the first stage models,
-# |  and all the rest ot the second stage.
+# |  Let us give 'X_time' to the first stage models,
+# |  and all the rest to the second stages.
 # |
 # |
 
@@ -617,13 +611,12 @@ X2 = pd.concat([X_lag,
 X2['day'] = X2.index.day
 
 # -------------------------------------------------------
-# `y` must be `pd.DataFrame` not `pd.Series`.
+# |`y` must be `pd.DataFrame`, not `pd.Series`.
 
 y = pd.DataFrame(y)
 
 # -------------------------------------------------------
-# `feture_names must be unique`.
-#
+# |`feature_names must be unique`.
 
 print(X1.info())
 print(X2.info())
@@ -639,7 +632,7 @@ X2_train, X2_test, y_train, y_test = train_test_split(
     X2, y, test_size=0.2, shuffle=False)
 
 # -------------------------------------------------------
-# Hybrid solutions.
+# | Hybrid solutions.
 
 model_1_list = [LinearRegression(fit_intercept=False),
                 ElasticNet(), Lasso(), Ridge()]
@@ -685,10 +678,10 @@ display(hybrid_result.sort_values('test_rmse'))
 # -------------------------------------------------------
 # | Again the best is the combination of
 # | * __`Lasso`__ and __`RandomForestRegressor`__.
-# |
-# | While there many combinations that apparently suffer
+
+# | While there are many combinations that apparently suffer
 # | from overfitting, `Lasso`+`RandomForestRegressor`
-# | has a good balance in training and test errors.
+# | has a good balance between training and test errors, as well.
 # |
 # | Let us have a look.
 # |
@@ -709,5 +702,12 @@ fig_wrap(fig, IMAGE_DIR/'fig10.png')
 
 # -------------------------------------------------------
 # | Looks excellent.
+
+# -------------------------------------------------------
+# | ## 5. To-Do
+# |  1. Include holidays and other ancillary features.
+# |  2. Do multi-output for different product families.
+# |
+
 # -------------------------------------------------------
 # | END
