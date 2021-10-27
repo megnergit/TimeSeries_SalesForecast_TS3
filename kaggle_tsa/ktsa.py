@@ -83,10 +83,11 @@ def show_whole_dataframe(show):
 
 
 def fig_wrap(fig, file_name):
-    w = '1280px'
-    h = '640px'
+    w = 1280
+    h = 640
     from IPython import get_ipython
     fig.write_image(file_name, width=w, height=h)
+#    fig.write_image(file_name)
 
     is_jupyter = get_ipython().__class__.__name__
     if is_jupyter == 'NoneType':
