@@ -16,8 +16,8 @@ or
  ## 1. Introduction
 
  This is a notebook to practice the routine procedures
- commonly used in the time sequence analysis.
- This notebook is based on the Kaggle [Time Series Analysis](https://www.kaggle.com/learn/time-series)
+ commonly used in the time series analysis.
+ This notebook is based on the Kaggle course [Time Series Analysis](https://www.kaggle.com/learn/time-series)
  offered by Ryan Holbrook.
 
  We have [the sales record of thousand types of products
@@ -25,25 +25,24 @@ or
  We will make predictions of the sales in the future, using
  the data and the machine learning techniques. We also have
  ancillary data, such as the official holidays in Ecuador,
- and the prices of oil in the country in the month.
+ and the prices of oil in the country in the same month.
  The main focus in this notebook is __cycles__ in the time series.
  'Lags' is the usual technique to deal with the cycles, but we will
- also try __moving average__ to reproduce the cycles, to see
+ also try __moving average__ to reproduce the cycles. We will see
  how the two technique work similarly or differently.
 
- There are two types of machine learning models.
+ There are two types of machine learning models,
   1. that can learn a trend  [linear regression, etc.] and
   2. that cannot learn a trend [xgboost, decision trees, etc.],
- because the latter does not learn to 'extrapolate'.
+ because the latter does not learn an 'extrapolation'.
 
-
- In order to make the most of the machine learning,
- we will combine both. Use a linear model to extrapolate the target
- in the first stage, and use more sophisticated models to
- reproduce the residuals in the second stage.
- This multi-stage strategy is called __hybrid models__.
- In this notebook we will start with combining a linear regressor
- with `xgboost`, and continue to mix other models as well.
+ In order to make the most of the machine learning, we will combine
+ both, i.e., we will use a linear model to extrapolate the trend of teh
+ target in the first stage, and use more sophisticated models to reproduce
+ the  residuals in the second stage.  This multi-stage strategy is called
+ __hybrid models__.  In this notebook we will first combine a
+ linear regressor with `xgboost`, and continue to mix other models as
+ well.
 
  ## 2. Task
 
