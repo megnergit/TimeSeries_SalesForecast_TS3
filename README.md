@@ -37,28 +37,27 @@ or
  because the latter does not learn an 'extrapolation'.
 
  In order to make the most of the machine learning, we will combine
- both, i.e., we will use a linear model to extrapolate the trend of teh
+ both, i.e., we will use a linear model to extrapolate the trend of the
  target in the first stage, and use more sophisticated models to reproduce
  the  residuals in the second stage.  This multi-stage strategy is called
  __hybrid models__.  In this notebook we will first combine a
- linear regressor with `xgboost`, and continue to mix other models as
- well.
+ linear regressor model with `xgboost`, and continue to mix other models
+ as  well.
 
  ## 2. Task
 
  1. Concentrate on the sales of magazines. Keep in mind
  the following components,
 
-    + seasonality.
-    + lags.
-    + partial autocorrelation function.
-    + ancillary data for the products on promotion.
+    + seasonality
+    + lags
+    + partial autocorrelation function
+    + ancillary data for the number of the products on promotion
 
-
- Note that lags contains seasonality, as 7-days (weekly) trend
- shows up exactly as a high correlation of the feature separated by 7-days
- (=7 days lag). In order to isolate the lagged features (that are not seasonality),
-  we will have to first remove the seasonality from the target feature.
+ Note that lags contains seasonality, as 7-days (weekly) trend shows
+ up exactly as a correlation of the 7-days frequency (=7 days lag). In
+ order to isolate the lagged features (that are not seasonality), we
+ will first remove the seasonality from the target feature.
 
 
  ## 3. Data
