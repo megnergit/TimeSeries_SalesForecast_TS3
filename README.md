@@ -1,5 +1,5 @@
 ------------------------------------------------------------------
-# Flu Prediction  - Time Series Analysis TS2
+# Sales Prediction  - Time Series Analysis TS3
 ------------------------------------------------------------------
 ## How to run the Demo
 
