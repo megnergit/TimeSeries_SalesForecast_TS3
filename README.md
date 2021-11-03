@@ -8,6 +8,7 @@
 or 
 
 2. `py2nb sales.py`
+
     It creates a Jupyter Notebook `sales.ipynb`.
     Load it on Jupyter and run it there. 
     
@@ -23,7 +24,7 @@ or
  We have [the sales record of thousand types of products
  in the supermarket chain 'Favorita' in Ecuador](https://www.kaggle.com/c/store-sales-time-series-forecasting).
  We will make predictions of the sales in the future, using
- the data and the machine learning techniques. We also have
+ the data with the machine learning techniques. We also have
  ancillary data, such as the official holidays in Ecuador,
  and the prices of oil in the country in the same month.
  The main focus in this notebook is __cycles__ in the time series.
@@ -39,10 +40,10 @@ or
  In order to make the most of the machine learning, we will combine
  both, i.e., we will use a linear model to extrapolate the trend of the
  target in the first stage, and use more sophisticated models to reproduce
- the  residuals in the second stage.  This multi-stage strategy is called
+ the residuals in the second stage. This multi-stage strategy is called
  __hybrid models__.  In this notebook we will first combine a
  linear regressor model with `xgboost`, and continue to mix other models
- as  well.
+ as well.
 
  ## 2. Task
 
