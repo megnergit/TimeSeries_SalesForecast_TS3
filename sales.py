@@ -83,7 +83,7 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 from IPython.display import IFrame
 
-import kaleido
+# import kaleido
 from kaggle_tsa.ktsa import *
 
 # Model 1 : can extrapolate
