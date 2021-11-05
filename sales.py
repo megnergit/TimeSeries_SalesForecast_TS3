@@ -27,7 +27,7 @@
 # |
 
 # | In order to make the most of the machine learning,
-# | we will combine both. We will use a linear model to extrapolate the 
+# | we will combine both. We will use a linear model to extrapolate the
 # | trend in teh target in the first stage, and use more sophisticated models to
 # | reproduce the residuals in the second stage.
 # | This multi-stage strategy is called __hybrid models__.
@@ -86,18 +86,15 @@ from IPython.display import IFrame
 import kaleido
 from kaggle_tsa.ktsa import *
 
-# Model 1
+# Model 1 : can extrapolate
 # from pyearth import Earth
-# multivariate adaptive regression splines
-# installation failed
-
+# multivariate adaptive regression splines => installation failed
 from sklearn.linear_model import ElasticNet, Lasso, Ridge
 
-# Model 2
+# Model 2 : cannot extrapolate
 from sklearn.ensemble import ExtraTreesRegressor, RandomForestRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.neural_network import MLPRegressor
-
 
 # -------------------------------------------------------
 # | Set up directories.

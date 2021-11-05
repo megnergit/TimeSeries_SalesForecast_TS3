@@ -55,11 +55,10 @@ or
     + partial autocorrelation function
     + ancillary data for the number of the products on promotion
 
- Note that lags contains seasonality, as 7-days (weekly) trend shows
- up exactly as a correlation of the 7-days frequency (=7 days lag). In
- order to isolate the lagged features (that are not seasonality), we
- will first remove the seasonality from the target feature.
-
+Note that lags contains seasonality, as 7-days (weekly) trend shows
+up exactly as a correlation of the 7-days frequency (=7 days lag). In
+order to isolate the lagged features (that are not seasonality), we
+will first remove the seasonality from the target feature.
 
  ## 3. Data
  1. [sales record in supermarket-chain 'Favorita' in Ecuador](https://www.kaggle.com/c/store-sales-time-series-forecasting).
