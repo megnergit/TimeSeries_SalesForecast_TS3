@@ -279,16 +279,15 @@ train_rmse, test_rmse = evaluate_error(
 
 # -------------------------------------------------------
 # | Even after manually tuning the `xgboost` parameters,
-# | we could not improve the results with a linear regression
-# | only.
-
-
+# | we could not improve the results with a linear regression
+# | only.
+
 # | So, there is no advantage in adding `XGBoost` in the second
-# | stage. We will try the hybrid models further in the following
+# | stage. We will try hybrid models further in the following
 # | steps.
 # |
 # | 1. Create 'BoostedHybrid` class (it is in `ktsa.py` module)
-# |    so that we can try different combinations of a linear model
+# |    so that we can try all different combinations of a linear model
 # |    and a booster quickly.
 # | 2. Create MA (moving average) features and feed them
 # |    to the hybrid models.
@@ -305,7 +304,7 @@ train_rmse, test_rmse = evaluate_error(
 # | from xgboost import XGBRegressor
 # | from sklearn.ensemble import ExtraTreesRegressor, RandomForestRegressor
 # | from sklearn.neighbors import KNeighborsRegressor
-# | from sklearn.neural_network import MLPRegressor
+# | from sklearn.neural_network import MLPRegressor
 # |
 # | ```
 # -------------------------------------------------------
